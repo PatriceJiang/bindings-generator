@@ -24,6 +24,7 @@ do {
             #while $count < $arg_count
                 #set $arg = $param_types[$count]
                 #set $arg_type = $arg.to_string($generator)
+                #set $arg_type_declare = $arg.to_type_decl($generator)
             ${arg.from_native({"generator": $generator,
                                  "arg_type": $arg_type,
                                  "in_value": "larg" + str(count),

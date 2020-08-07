@@ -18,12 +18,13 @@ static bool ${signature_name}(se::State& s)
     #while $count < $arg_idx
         #set $arg = $arguments[$count]
         #set $arg_type = arg.to_string($generator)
+        #set $arg_type_declare = $arg.to_type_decl($generator)
         #if $arg.is_numeric
-    ${arg.to_string($generator)} arg${count} = 0;
+    ${arg_type_declare} arg${count} = 0;
         #elif $arg.is_pointer
-    ${arg.to_string($generator)} arg${count} = nullptr;
+    ${arg_type_declare} arg${count} = nullptr;
         #else
-    ${arg.to_string($generator)} arg${count};
+    ${arg_type_declare} arg${count};
         #end if
         #set $count = $count + 1
     #end while

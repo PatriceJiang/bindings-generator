@@ -20,7 +20,6 @@ static bool ${signature_name}_get_${name}(se::State& s)
                          "type_name": $ntype.namespaced_class_name.replace("*", ""),
                          "ntype": $ntype.get_whole_name($generator),
                          "level": 2,
-                         "scriptname": $generator.scriptname_from_native($ntype.namespaced_class_name, $ntype.namespace_name),
                          "in_value":"cobj->" + $pretty_name,
                          "out_value": "jsret"
                          })};
@@ -38,6 +37,7 @@ static bool ${signature_name}_set_${name}(se::State& s)
 
     CC_UNUSED bool ok = true;
     #set $arg_type = $ntype.to_string($generator)
+    #set $arg_type_declare = $ntype.to_type_decl($generator)
 #if $ntype.is_object and not $ntype.object_can_convert($generator)
     #set conv_text = $ntype.to_native({"generator": $generator, \
                         "arg_idx": 2, \
@@ -56,19 +56,18 @@ static bool ${signature_name}_set_${name}(se::State& s)
                         "in_value": "args[0]", \
                         "out_value": "arg0", \
                         "func_name": $name, \
-                        "scriptname": $generator.scriptname_from_native($ntype.namespaced_class_name, $ntype.namespace_name), \
                         "level": 2, \
                         "arg":$ntype, \
                     })
 #end if    
 #if "seval_to_reference" in $conv_text
-    $arg_type* arg0 = nullptr;
+    $arg_type_declare* arg0 = nullptr;
 #elif $ntype.is_numeric
-    $arg_type arg0 = 0;
+    $arg_type_declare arg0 = 0;
 #elif $ntype.is_pointer
-    $arg_type arg0 = nullptr;
+    $arg_type_declare arg0 = nullptr;
 #else
-    $arg_type arg0;
+    $arg_type_declare arg0;
 #end if
     $conv_text;
     SE_PRECONDITION2(ok, false, "${signature_name}_set_${name} : Error processing new value");

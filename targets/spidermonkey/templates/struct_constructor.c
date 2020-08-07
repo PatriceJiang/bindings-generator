@@ -26,6 +26,7 @@ static bool ${struct_constructor_name}(se::State& s)
         #set conv_text_array = []
         #for field in $public_fields
         #set field_type = field.ntype.to_string($generator)
+        #set $arg_type_declare = field.ntype.to_type_decl($generator)
         #set conv_text = $field.ntype.to_native({"generator": $generator, \
                              "arg" : $field.ntype, \
                              "arg_type": $field_type, \
@@ -39,13 +40,13 @@ static bool ${struct_constructor_name}(se::State& s)
                              "ntype": str($field_type)})
         #set conv_text_array += [$conv_text]
             #if "seval_to_reference" in $conv_text
-        ${field_type}* arg${arg_idx} = nullptr;
+        ${arg_type_declare}* arg${arg_idx} = nullptr;
             #elif $field.ntype.is_numeric
-        ${field_type} arg${arg_idx} = 0;
+        ${arg_type_declare} arg${arg_idx} = 0;
             #elif $field.ntype.is_pointer
-        ${field_type} arg${arg_idx} = nullptr;
+        ${arg_type_declare} arg${arg_idx} = nullptr;
             #else
-        ${field_type} arg${arg_idx};
+        ${arg_type_declare} arg${arg_idx};
             #end if
         json->getProperty("${field.name}", &field);
         if(!field.isUndefined()) {
@@ -77,6 +78,7 @@ static bool ${struct_constructor_name}(se::State& s)
         #set conv_text_array = []
         #for field in $public_fields
         #set field_type = field.ntype.to_string($generator)
+        #set $arg_type_declare = field.ntype.to_type_decl($generator)
         #set conv_text = $field.ntype.to_native({"generator": $generator, \
                              "arg": $field.ntype, \
                              "arg_type": $field_type, \
@@ -90,13 +92,13 @@ static bool ${struct_constructor_name}(se::State& s)
                              "ntype": str($field_type)})
         #set conv_text_array += [$conv_text]
             #if "seval_to_reference" in $conv_text_array[$arg_idx]
-        ${field_type}* arg${arg_idx} = nullptr;
+        ${arg_type_declare}* arg${arg_idx} = nullptr;
             #elif $field.ntype.is_numeric
-        ${field_type} arg${arg_idx} = 0;
+        ${arg_type_declare} arg${arg_idx} = 0;
             #elif $field.ntype.is_pointer
-        ${field_type} arg${arg_idx} = nullptr;
+        ${arg_type_declare} arg${arg_idx} = nullptr;
             #else
-        ${field_type} arg${arg_idx};
+        ${arg_type_declare} arg${arg_idx};
             #end if
         if (!args[${arg_idx}].isUndefined()) {
             $conv_text;

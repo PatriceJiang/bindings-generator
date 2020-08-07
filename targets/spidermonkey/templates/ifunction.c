@@ -19,6 +19,7 @@ static bool ${signature_name}(se::State& s)
         #while $count < $arg_idx
             #set $arg = $arguments[$count]
             #set $arg_type = $arg.to_string($generator)
+            #set $arg_type_declare = $arg.to_type_decl($generator)
             #set conv_txt= $arg.to_native({"generator": $generator,\
                              "arg" : $arg, \
                              "arg_type": $arg_type, \
@@ -31,13 +32,13 @@ static bool ${signature_name}(se::State& s)
                              "ntype": str($arg)}) 
             #set arg_conv_array += [$conv_txt]
             #if "seval_to_reference" in $conv_txt
-        $arg_type* arg${count} = nullptr;
+        $arg_type_declare* arg${count} = nullptr;
             #elif $arg.is_numeric
-        $arg_type arg${count} = 0;
+        $arg_type_declare arg${count} = 0;
             #elif $arg.is_pointer
-        $arg_type arg${count} = nullptr;
+        $arg_type_declare arg${count} = nullptr;
             #else
-        $arg_type arg${count};
+        $arg_type_declare arg${count};
             #end if
             #set $count = $count + 1
         #end while

@@ -112,6 +112,29 @@ stl_type_map = {
     'array': 1
 }
 
+
+stl_type_replacement = {
+    'std::vector': "cc::vector",
+    'std::list': "cc::list",
+    'std::queue': "cc::queue",
+    'std::priority_queue': "cc::priority_queue",
+    'std::dequeue': "cc::dequeue",
+    'std::set': "cc::set",
+    'std::map': "cc::map",
+    'std::multimap': "cc::multimap",
+    'std::unordered_map': "cc::unordered_map",
+    "std::string": "cc::string"
+}
+
+
+def replace_with_cc_namespace(name):
+    for k, v in stl_type_replacement.items():
+        if k in name:
+            name = name.replace(k, v)
+    return name
+
+
+
 def find_sub_string_count(s, start, end, substr):
     count = 0
     pos = s.find(substr, start, end)
@@ -509,7 +532,7 @@ class NativeType(object):
 
                     nt.is_function = True
                     nt.ret_type = NativeType.from_string(ret_type, generator)
-                    nt.param_types = [NativeType.from_string(string, generator) for string in params]
+                    nt.param_types = [ NativeType.from_string(string, generator) for string in params]
 
         # mark argument as not supported
         if nt.name == INVALID_NATIVE_TYPE:
@@ -533,7 +556,7 @@ class NativeType(object):
 
     @property
     def lambda_parameters(self):
-        params = ["%s larg%d" % (str(nt), i) for i, nt in enumerate(self.param_types)]
+        params = ["%s larg%d" % (str(nt.to_type_decl(self.generator)), i) for i, nt in enumerate(self.param_types)]
         return ", ".join(params)
 
     @staticmethod
@@ -635,6 +658,9 @@ class NativeType(object):
             indent = convert_opts['level'] * four_space
             return str(tpl).replace("\n", "\n" + indent)
 
+
+        # print("::: %s %s -> keys: %s" % ( convert_opts["arg_type"] ,NativeType.dict_get_value_re(to_native_dict, keys), keys))
+
         if NativeType.dict_has_key_re(to_native_dict, keys):
             tpl = NativeType.dict_get_value_re(to_native_dict, keys)
             tpl = Template(tpl, searchList=[convert_opts])
@@ -643,6 +669,12 @@ class NativeType(object):
         if "arg" in convert_opts and not convert_opts["arg"].is_pointer:
             return "ok &= seval_to_reference(%s, &%s)" % (convert_opts["in_value"], convert_opts["out_value"])
         return "#pragma warning NO CONVERSION TO NATIVE FOR " + self.name + "\n" + convert_opts['level'] * four_space +  "ok = false"
+
+    def to_type_decl(self, generator):
+        l1 = self.to_string(generator)
+        l2 = replace_with_cc_namespace(l1)
+        # print("type %s -> %s" % (l1, l2))
+        return l2
 
     def to_string(self, generator):
         conversions = generator.config['conversions']
@@ -691,7 +723,7 @@ class NativeType(object):
             # print("get_whole_name: " + name + " --> " + to_replace)
             name = to_replace
 
-        return name
+        return replace_with_cc_namespace(name)
 
     def get_class_name(self, generator):
         original_name = self.to_string(generator);
@@ -701,7 +733,7 @@ class NativeType(object):
         cls_name = original_name.replace('*', '').replace('const ', '').replace('&', '')
         cls_name = cls_name.split("::")[-1]
         # print("get_class_name: " + original_name + " -> " + cls_name)
-        return cls_name;
+        return cls_name
 
     def object_can_convert(self, generator, is_to_native = True):
         if self.is_object:
